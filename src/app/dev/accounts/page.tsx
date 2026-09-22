@@ -43,7 +43,7 @@ export default async function AccountsPage() {
       <DashboardHeader
         title="Accounts"
         user={user}
-        links={[{ href: "/dev", label: "Dev dashboard" }]}
+        links={[{ href: "/dev", label: "Calculation history" }]}
       />
 
       <AccountsManager accounts={accounts} currentUserId={user.id} />

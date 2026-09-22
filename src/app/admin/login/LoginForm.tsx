@@ -25,7 +25,7 @@ export default function LoginForm({ notice }: { notice?: string }) {
         <Logo size={44} />
         <h1 className="mt-3 mb-1 text-xl font-semibold">Staff Login</h1>
         <p className="mb-6 text-sm text-black/60 dark:text-white/60">
-          Sign in to the admin or dev dashboard.
+          Sign in to manage salary ranges and view calculation history.
         </p>
 
         {notice && (

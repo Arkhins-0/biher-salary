@@ -21,7 +21,7 @@ export default async function DevPage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 p-6">
-      <DashboardHeader title="Dev Dashboard" user={user} links={links} />
+      <DashboardHeader title="Calculation History" user={user} links={links} />
 
       <DevDashboard
         csvUploads={csvUploads}

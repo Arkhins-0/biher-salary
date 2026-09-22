@@ -11,7 +11,8 @@ A dashboard for calculating university staff salaries.
   departments; each department has independent ME and PhD salary ranges,
   each with its own min/max experience range (so e.g. CSE-ME and CSE-PhD
   can use different experience caps).
-- **Dev page (`/dev`)**: browse CSV uploads and manual calculations.
+- **Calculation history (`/dev`)**: browse CSV uploads and manual
+  calculations. Visible to both admin and dev accounts.
 - **Accounts (`/dev/accounts`, dev role only)**: invite new admin/dev
   accounts by email, disable/enable them, or remove them. Invited people get
   an emailed setup link where they choose their name, designation and

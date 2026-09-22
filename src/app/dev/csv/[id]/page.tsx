@@ -46,7 +46,7 @@ export default async function CsvUploadDetailPage({
             href="/dev"
             className="text-sm text-black/60 underline-offset-4 hover:underline dark:text-white/60"
           >
-            Back to Dev Dashboard
+            Back to Calculation History
           </Link>
         </div>
       </div>

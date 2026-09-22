@@ -16,7 +16,7 @@ export default async function AdminPage() {
       <DashboardHeader
         title="Admin Dashboard"
         user={user}
-        links={[{ href: "/dev", label: "Dev dashboard" }]}
+        links={[{ href: "/dev", label: "Calculation history" }]}
       />
 
       <AdminDashboard departments={departmentsWithRanges} />
