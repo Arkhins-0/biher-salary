@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef } from "react";
 import type { CurrentUser } from "@/lib/auth";
 import { useToast } from "@/components/notifications/NotificationsProvider";
+import PasswordInput from "@/components/PasswordInput";
 import {
   changePasswordAction,
   updateProfileAction,
@@ -133,39 +134,36 @@ function PasswordForm() {
       <label className={labelClass} htmlFor="current">
         Current password
       </label>
-      <input
+      <PasswordInput
         id="current"
         name="current"
-        type="password"
         autoComplete="current-password"
         required
-        className={`${inputClass} mb-4`}
+        wrapperClassName="mb-4"
       />
 
       <label className={labelClass} htmlFor="next">
         New password
       </label>
-      <input
+      <PasswordInput
         id="next"
         name="next"
-        type="password"
         autoComplete="new-password"
         minLength={8}
         required
-        className={`${inputClass} mb-4`}
+        wrapperClassName="mb-4"
       />
 
       <label className={labelClass} htmlFor="confirm">
         Confirm new password
       </label>
-      <input
+      <PasswordInput
         id="confirm"
         name="confirm"
-        type="password"
         autoComplete="new-password"
         minLength={8}
         required
-        className={`${inputClass} mb-5`}
+        wrapperClassName="mb-5"
       />
 
       {state.error && (

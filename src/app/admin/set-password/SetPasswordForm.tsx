@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import Logo from "@/components/Logo";
+import PasswordInput from "@/components/PasswordInput";
 import { setPasswordAction, type SetPasswordState } from "./actions";
 
 const initialState: SetPasswordState = {};
@@ -81,27 +82,25 @@ export default function SetPasswordForm({
         <label className="mb-1 block text-sm font-medium" htmlFor="password">
           {isSetup ? "Password" : "New password"}
         </label>
-        <input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
           autoComplete="new-password"
           minLength={8}
           required
-          className={`${inputClass} mb-4`}
+          wrapperClassName="mb-4"
         />
 
         <label className="mb-1 block text-sm font-medium" htmlFor="confirm">
           Confirm password
         </label>
-        <input
+        <PasswordInput
           id="confirm"
           name="confirm"
-          type="password"
           autoComplete="new-password"
           minLength={8}
           required
-          className={`${inputClass} mb-6`}
+          wrapperClassName="mb-6"
         />
 
         {state.error && (

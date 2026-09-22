@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { loginAction, type LoginState } from "./actions";
 import Logo from "@/components/Logo";
+import PasswordInput from "@/components/PasswordInput";
 
 const initialState: LoginState = {};
 
@@ -57,13 +58,12 @@ export default function LoginForm({ notice }: { notice?: string }) {
             Forgot password?
           </Link>
         </div>
-        <input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
           autoComplete="current-password"
           required
-          className={`${inputClass} mb-6`}
+          wrapperClassName="mb-6"
         />
 
         {state.error && (
