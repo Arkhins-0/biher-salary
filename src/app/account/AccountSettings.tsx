@@ -18,16 +18,28 @@ const labelClass = "mb-1 block text-sm font-medium";
 const buttonClass =
   "rounded-md bg-black px-4 py-2 text-sm font-medium text-white transition hover:bg-black/80 disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-white/80";
 
-export default function AccountSettings({ user }: { user: CurrentUser }) {
+export default function AccountSettings({
+  user,
+  pendingEmail,
+}: {
+  user: CurrentUser;
+  pendingEmail: string | null;
+}) {
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      <ProfileForm user={user} />
+      <ProfileForm user={user} pendingEmail={pendingEmail} />
       <PasswordForm />
     </div>
   );
 }
 
-function ProfileForm({ user }: { user: CurrentUser }) {
+function ProfileForm({
+  user,
+  pendingEmail,
+}: {
+  user: CurrentUser;
+  pendingEmail: string | null;
+}) {
   const toast = useToast();
   const [state, formAction, pending] = useActionState(
     updateProfileAction,
@@ -35,8 +47,18 @@ function ProfileForm({ user }: { user: CurrentUser }) {
   );
 
   useEffect(() => {
-    if (state.success) toast.success("Profile updated");
+    if (!state.success) return;
+    if (state.pendingEmail) {
+      toast.success(
+        "Verification email sent",
+        `Check ${state.pendingEmail} and click the link to confirm the change.`,
+      );
+    } else {
+      toast.success("Profile updated");
+    }
   }, [state, toast]);
+
+  const awaiting = state.pendingEmail ?? pendingEmail;
 
   return (
     <form
@@ -88,9 +110,18 @@ function ProfileForm({ user }: { user: CurrentUser }) {
         required
         className={`${inputClass} mb-1`}
       />
-      <p className="mb-5 text-xs text-black/50 dark:text-white/50">
-        Used to sign in and to receive password reset links.
+      <p className="mb-2 text-xs text-black/50 dark:text-white/50">
+        Used to sign in and to receive password reset links. Changing it sends
+        a verification link to the new address; the change applies once you
+        click it, and you will be asked to sign in again.
       </p>
+      {awaiting && awaiting !== (user.email ?? "") && (
+        <p className="mb-5 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+          Awaiting verification: <span className="font-medium">{awaiting}</span>
+          . Save again with the same address to resend the link.
+        </p>
+      )}
+      {!awaiting && <div className="mb-3" />}
 
       {state.error && (
         <p className="mb-4 text-sm text-red-600 dark:text-red-400">

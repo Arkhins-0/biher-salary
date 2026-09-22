@@ -18,8 +18,10 @@ A dashboard for calculating university staff salaries.
   an emailed setup link where they choose their name, designation and
   password on first sign-in.
 - **Account settings (`/account`)**: every signed-in user can update their
-  name, designation, email and password. "Forgot password" on the login page
-  emails a reset link.
+  name, designation, email and password. Changing the email sends a
+  verification link to the new address; the change applies when it is
+  clicked and the user is asked to sign in again. "Forgot password" on the
+  login page emails a reset link.
 
 Built with Next.js (App Router), Drizzle ORM, and Neon Postgres.
 

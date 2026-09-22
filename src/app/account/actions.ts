@@ -6,8 +6,14 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { admins } from "@/db/schema";
 import { requireUser } from "@/lib/auth";
+import { sendEmailChangeLink } from "@/lib/accountTokens";
 
-export type AccountActionState = { error?: string; success?: boolean };
+export type AccountActionState = {
+  error?: string;
+  success?: boolean;
+  /** Set when a verification email was sent for a new address. */
+  pendingEmail?: string;
+};
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -29,23 +35,48 @@ export async function updateProfileAction(
     return { error: "A valid email address is required." };
   }
 
-  const [taken] = await db
-    .select({ id: admins.id })
-    .from(admins)
-    .where(and(eq(admins.email, email), ne(admins.id, user.id)));
-  if (taken) {
-    return { error: "That email is already used by another account." };
+  const emailChanged = email !== (user.email ?? "").toLowerCase();
+
+  if (emailChanged) {
+    const [taken] = await db
+      .select({ id: admins.id })
+      .from(admins)
+      .where(and(eq(admins.email, email), ne(admins.id, user.id)));
+    if (taken) {
+      return { error: "That email is already used by another account." };
+    }
   }
 
+  // Name and designation apply immediately. The email only changes once the
+  // new address is verified from the link we send it.
   await db
     .update(admins)
-    .set({ name, designation, email })
+    .set({ name, designation })
     .where(eq(admins.id, user.id));
+
+  let pendingEmail: string | undefined;
+  if (emailChanged) {
+    try {
+      await sendEmailChangeLink({
+        id: user.id,
+        currentEmail: user.email,
+        newEmail: email,
+      });
+      pendingEmail = email;
+    } catch (err) {
+      console.error("Failed to send email verification", err);
+      revalidatePath("/account");
+      return {
+        error:
+          "Your name and designation were saved, but the verification email could not be sent. Try changing the email again in a few minutes.",
+      };
+    }
+  }
 
   revalidatePath("/account");
   revalidatePath("/admin");
   revalidatePath("/dev");
-  return { success: true };
+  return { success: true, pendingEmail };
 }
 
 export async function changePasswordAction(

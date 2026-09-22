@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { dashboardPathFor, requireUser } from "@/lib/auth";
+import { getPendingEmailChange } from "@/lib/accountTokens";
 import DashboardHeader from "@/components/DashboardHeader";
 import SupportLink from "@/components/SupportLink";
 import AccountSettings from "./AccountSettings";
@@ -9,6 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function AccountPage() {
   const user = await requireUser();
   const back = dashboardPathFor(user.role);
+  const pendingEmail = await getPendingEmailChange(user.id);
 
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 p-6">
@@ -18,7 +20,7 @@ export default async function AccountPage() {
         links={[{ href: back, label: "Back to dashboard" }]}
       />
 
-      <AccountSettings user={user} />
+      <AccountSettings user={user} pendingEmail={pendingEmail} />
 
       <p className="mt-8 text-sm">
         <Link

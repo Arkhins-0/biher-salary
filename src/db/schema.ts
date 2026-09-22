@@ -14,7 +14,11 @@ import type { CsvUploadResultRow } from "@/lib/csv";
 
 export const qualificationEnum = pgEnum("qualification", ["ME", "PhD"]);
 export const roleEnum = pgEnum("role", ["admin", "dev"]);
-export const tokenPurposeEnum = pgEnum("token_purpose", ["setup", "reset"]);
+export const tokenPurposeEnum = pgEnum("token_purpose", [
+  "setup",
+  "reset",
+  "email_change",
+]);
 
 // Staff accounts (both "admin" and "dev" roles). Accounts created from the
 // dev "Accounts" page start with only an email and no password; the invite
@@ -32,8 +36,9 @@ export const admins = pgTable("admins", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Single-use links for first-time account setup and password resets. Only a
-// SHA-256 hash of the token is stored; the raw token lives in the email link.
+// Single-use links for first-time account setup, password resets and email
+// address changes. Only a SHA-256 hash of the token is stored; the raw token
+// lives in the email link. `new_email` is set for email_change tokens.
 export const accountTokens = pgTable("account_tokens", {
   id: serial("id").primaryKey(),
   adminId: integer("admin_id")
@@ -41,6 +46,7 @@ export const accountTokens = pgTable("account_tokens", {
     .references(() => admins.id, { onDelete: "cascade" }),
   tokenHash: text("token_hash").notNull().unique(),
   purpose: tokenPurposeEnum("purpose").notNull(),
+  newEmail: text("new_email"),
   expiresAt: timestamp("expires_at").notNull(),
   usedAt: timestamp("used_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

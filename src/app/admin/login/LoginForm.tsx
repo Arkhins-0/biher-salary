@@ -8,10 +8,22 @@ import PasswordInput from "@/components/PasswordInput";
 
 const initialState: LoginState = {};
 
+export interface LoginNotice {
+  tone: "success" | "error";
+  text: string;
+}
+
+const NOTICE_CLASS: Record<LoginNotice["tone"], string> = {
+  success:
+    "border-green-200 bg-green-50 text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-200",
+  error:
+    "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200",
+};
+
 const inputClass =
   "w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm outline-none focus:border-black/40 dark:border-white/20 dark:focus:border-white/40";
 
-export default function LoginForm({ notice }: { notice?: string }) {
+export default function LoginForm({ notice }: { notice?: LoginNotice }) {
   const [state, formAction, pending] = useActionState(
     loginAction,
     initialState,
@@ -30,8 +42,10 @@ export default function LoginForm({ notice }: { notice?: string }) {
         </p>
 
         {notice && (
-          <p className="mb-4 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-200">
-            {notice}
+          <p
+            className={`mb-4 rounded-md border px-3 py-2 text-sm ${NOTICE_CLASS[notice.tone]}`}
+          >
+            {notice.text}
           </p>
         )}
 

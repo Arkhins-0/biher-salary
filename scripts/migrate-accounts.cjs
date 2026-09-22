@@ -1,6 +1,7 @@
 // One-off migration for the account management feature: adds email, name,
 // designation and disabled columns to `admins`, makes username/password
-// nullable, and creates the `account_tokens` table.
+// nullable, creates the `account_tokens` table, and adds email-change
+// verification support to it.
 //
 // Run once with:  npm run db:migrate-accounts
 //
@@ -46,6 +47,9 @@ const statements = [
      ALTER TABLE "account_tokens" ADD CONSTRAINT "account_tokens_admin_id_admins_id_fk"
        FOREIGN KEY ("admin_id") REFERENCES "public"."admins"("id") ON DELETE cascade ON UPDATE no action;
    EXCEPTION WHEN duplicate_object THEN NULL; END $$`,
+  // Email-change verification (added later; idempotent).
+  `ALTER TYPE "public"."token_purpose" ADD VALUE IF NOT EXISTS 'email_change'`,
+  `ALTER TABLE "account_tokens" ADD COLUMN IF NOT EXISTS "new_email" text`,
 ];
 
 (async () => {

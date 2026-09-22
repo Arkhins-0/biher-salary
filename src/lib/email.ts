@@ -54,13 +54,39 @@ export async function sendEmail(input: SendEmailInput): Promise<void> {
   }
 }
 
-function layout(title: string, bodyHtml: string) {
+/** Shared bits every template needs: absolute origin for the logo, support contact. */
+export interface EmailContext {
+  baseUrl: string;
+}
+
+function supportEmail() {
+  return process.env.SUPPORT_EMAIL?.trim() || null;
+}
+
+function supportTextFooter() {
+  const s = supportEmail();
+  return s ? `\n\nNeed help? Contact ${s}` : "";
+}
+
+function layout(ctx: EmailContext, title: string, bodyHtml: string) {
+  const logoUrl = `${ctx.baseUrl}/logo.jpeg`;
+  const s = supportEmail();
+  const supportHtml = s
+    ? `<p style="margin:0 0 4px;font-size:12px;color:#777">Need help? Contact <a href="mailto:${escapeHtml(s)}" style="color:#111">${escapeHtml(s)}</a></p>`
+    : "";
+
   return `<!doctype html>
 <html><body style="margin:0;padding:24px;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;color:#111">
   <div style="max-width:520px;margin:0 auto;background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:32px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <img src="${escapeHtml(logoUrl)}" alt="Biher" width="44" height="44" style="display:inline-block;width:44px;height:44px;border-radius:8px;vertical-align:middle;margin-right:12px">
+      <span style="font-size:15px;font-weight:700;vertical-align:middle">Biher Salary Calculator</span>
+    </div>
     <h1 style="margin:0 0 16px;font-size:20px">${escapeHtml(title)}</h1>
     ${bodyHtml}
-    <p style="margin:24px 0 0;font-size:12px;color:#777">Biher Salary Calculator</p>
+    <hr style="border:0;border-top:1px solid #eee;margin:28px 0 16px">
+    ${supportHtml}
+    <p style="margin:0;font-size:12px;color:#999">Biher Salary Calculator</p>
   </div>
 </body></html>`;
 }
@@ -70,12 +96,15 @@ function button(href: string, label: string) {
   <p style="font-size:12px;color:#777;word-break:break-all">Or paste this link into your browser:<br>${escapeHtml(href)}</p>`;
 }
 
-export function inviteEmail(opts: {
-  to: string;
-  role: "admin" | "dev";
-  setupUrl: string;
-  expiresInDays: number;
-}) {
+export function inviteEmail(
+  ctx: EmailContext,
+  opts: {
+    to: string;
+    role: "admin" | "dev";
+    setupUrl: string;
+    expiresInDays: number;
+  },
+) {
   const roleLabel = opts.role === "dev" ? "developer" : "admin";
   const subject = "Set up your Biher Salary account";
   const text = `You have been given ${roleLabel} access to the Biher Salary Calculator.
@@ -84,8 +113,9 @@ Open the link below to choose your name, designation and password. The link expi
 
 ${opts.setupUrl}
 
-If you were not expecting this email you can ignore it.`;
+If you were not expecting this email you can ignore it.${supportTextFooter()}`;
   const html = layout(
+    ctx,
     subject,
     `<p style="font-size:14px;line-height:1.6">You have been given <strong>${roleLabel}</strong> access to the Biher Salary Calculator.</p>
      <p style="font-size:14px;line-height:1.6">Open the link below to choose your name, designation and password. The link expires in ${opts.expiresInDays} days.</p>
@@ -95,11 +125,10 @@ If you were not expecting this email you can ignore it.`;
   return { to: opts.to, subject, text, html };
 }
 
-export function resetPasswordEmail(opts: {
-  to: string;
-  resetUrl: string;
-  expiresInMinutes: number;
-}) {
+export function resetPasswordEmail(
+  ctx: EmailContext,
+  opts: { to: string; resetUrl: string; expiresInMinutes: number },
+) {
   const subject = "Reset your Biher Salary password";
   const text = `We received a request to reset the password for your Biher Salary account.
 
@@ -107,13 +136,45 @@ Open the link below to choose a new password. The link expires in ${opts.expires
 
 ${opts.resetUrl}
 
-If you did not request this, you can ignore this email. Your password will not change.`;
+If you did not request this, you can ignore this email. Your password will not change.${supportTextFooter()}`;
   const html = layout(
+    ctx,
     subject,
     `<p style="font-size:14px;line-height:1.6">We received a request to reset the password for your Biher Salary account.</p>
      <p style="font-size:14px;line-height:1.6">Open the link below to choose a new password. The link expires in ${opts.expiresInMinutes} minutes.</p>
      ${button(opts.resetUrl, "Reset password")}
      <p style="font-size:12px;color:#777">If you did not request this, you can ignore this email. Your password will not change.</p>`,
+  );
+  return { to: opts.to, subject, text, html };
+}
+
+export function verifyEmailChangeEmail(
+  ctx: EmailContext,
+  opts: {
+    to: string;
+    currentEmail: string | null;
+    verifyUrl: string;
+    expiresInMinutes: number;
+  },
+) {
+  const subject = "Verify your new Biher Salary email address";
+  const fromLine = opts.currentEmail
+    ? `A request was made to change the sign-in email for your Biher Salary account from ${opts.currentEmail} to ${opts.to}.`
+    : `A request was made to set ${opts.to} as the sign-in email for your Biher Salary account.`;
+  const text = `${fromLine}
+
+Open the link below to confirm this address. The link expires in ${opts.expiresInMinutes} minutes. After verifying, you will be asked to sign in again with the new email.
+
+${opts.verifyUrl}
+
+If you did not request this, you can ignore this email. Your email will not change.${supportTextFooter()}`;
+  const html = layout(
+    ctx,
+    subject,
+    `<p style="font-size:14px;line-height:1.6">${escapeHtml(fromLine)}</p>
+     <p style="font-size:14px;line-height:1.6">Open the link below to confirm this address. The link expires in ${opts.expiresInMinutes} minutes. After verifying, you will be asked to sign in again with the new email.</p>
+     ${button(opts.verifyUrl, "Verify email address")}
+     <p style="font-size:12px;color:#777">If you did not request this, you can ignore this email. Your email will not change.</p>`,
   );
   return { to: opts.to, subject, text, html };
 }
