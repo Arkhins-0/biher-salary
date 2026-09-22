@@ -69,7 +69,7 @@ function supportTextFooter() {
 }
 
 function layout(ctx: EmailContext, title: string, bodyHtml: string) {
-  const logoUrl = `${ctx.baseUrl}/logo.jpeg`;
+  const logoUrl = `${ctx.baseUrl}/logo.png`;
   const s = supportEmail();
   const supportHtml = s
     ? `<p style="margin:0 0 4px;font-size:12px;color:#777">Need help? Contact <a href="mailto:${escapeHtml(s)}" style="color:#111">${escapeHtml(s)}</a></p>`
