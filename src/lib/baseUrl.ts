@@ -1,0 +1,17 @@
+import { headers } from "next/headers";
+
+/**
+ * Absolute origin used in emailed links. Set APP_URL in production; otherwise
+ * it is derived from the incoming request's Host header.
+ */
+export async function getBaseUrl(): Promise<string> {
+  const configured = process.env.APP_URL?.trim().replace(/\/+$/, "");
+  if (configured) return configured;
+
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+  const proto =
+    h.get("x-forwarded-proto") ??
+    (host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https");
+  return `${proto}://${host}`;
+}
